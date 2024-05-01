@@ -1,33 +1,52 @@
 "use strict"
 
-
+//리팩토링 할 때 함수로 만든거 싹다 깔끔하게 바꿔야 하고, 
+//date를 무조건 날릴 수 있게 바꿔야 하며
+//moment.format을 쓰지 말것. 왜 이것을 아직도 몰랐지?
+//이딴식으로 코딩하지 말자.
 
 const date = new Date()
 
 const row = document.querySelectorAll(".day-number")
+const rows = [...row]
 const prevButton = document.querySelector(".go-prev")
 const nextButton = document.querySelector(".go-next")
-
 const selectButton = document.querySelector(".select-button")
 
 
-selectButton.addEventListener("click", ()=>{
-  let year = document.querySelector("select[name=year] option:checked").text;
 
-  let month = document.querySelector("select[name=month] option:checked").text;
+//option 동적 생성하기 
+addEventListener("load", ()=>{
+for (let i=0; i<4; i++){
+    let year = document.createElement("option"); 
+    year.innerText = 2021 + i; 
+    document.querySelector("select[name=year]").append(year); 
+  }
+  
+  for(let i=1; i<=12; i++){
+          let month = document.createElement("option"); 
+          month.innerText = i; 
+          document.querySelector("select[name=month]").append(month); 
+      }
+})
+
+selectButton.addEventListener("click", ()=>{
+  //today를 가리키는 원판 제거 
+  rows.forEach((row)=>row.classList.remove("day-today"))
+  
+  let selectedYear = document.querySelector("select[name=year] option:checked").text;
+  let selectedMonth = document.querySelector("select[name=month] option:checked").text;
 
   const renderCalender = ()=>{
-    let currentYear = year// 현재 년도
-    let currentMonth =  month // 현재 월 (0부터 시작하므로 +1 해줌)
-    document.querySelector(".month-year").textContent= `${currentYear}년 ${currentMonth}월`
-    renderDays(currentYear, currentMonth);
+    document.querySelector(".month-year").textContent= `${selectedYear}년 ${selectedMonth}월`
 
+    //option으로 선택한 연도와 월을 파라미터로 던진다. 
+    renderDays(selectedYear, selectedMonth);
+    currentDate(selectedYear, selectedMonth)
   }
   renderCalender();
 })
   
-
-
 
 //현재 연도와 현재 월을 로딩해주는 함수 
 const renderCalender = ()=>{
@@ -35,6 +54,7 @@ const renderCalender = ()=>{
   let currentMonth =  date.getMonth()+1 // 현재 월 (0부터 시작하므로 +1 해줌)
   document.querySelector(".month-year").textContent= `${currentYear}년 ${currentMonth}월`
   renderDays(currentYear, currentMonth);
+  currentDate(currentYear, currentMonth)
 
 }
 renderCalender();
@@ -58,8 +78,6 @@ prevButton.addEventListener("click", ()=>{
 nextButton.addEventListener("click", ()=>{
   nextMonth()
 })
-
-
 
 
 //사용자가 보는 월에 따라서 여러 변수들을 달리 계산해주는 함수
@@ -89,8 +107,6 @@ function renderDays (currentYear, currentMonth) {
 //날짜 배열을 만든다. 
 
 function currentArr (prevDate, prevEndday, nextDate, endDay) {
-
-  console.log(moment("2023-11").endOf('month').format('YYYY-MM-DD'))
   //prevDate는 지난달 마지막 일의 요일, prevEndday는 지난달 마지막일, endDay는 현재 달 마지막일 
   let arr = [];
   
@@ -110,7 +126,6 @@ function currentArr (prevDate, prevEndday, nextDate, endDay) {
       arr.push(`${i}`)
       }
     }
-  console.log(endDay, "씨발")
   //현재달의 시작 일과 마지막 일의 배열에서의 idx를 확인한다. 
   let startIdx = arr.findIndex((arrs) => arrs === "01")
   let endIdx = parseInt(endDay, 10) + startIdx
@@ -130,13 +145,11 @@ function currentArr (prevDate, prevEndday, nextDate, endDay) {
     row[i].innerHTML = arr[i]
   }
 
-  let rows = [...row]
-
+  // 각 날짜에 대해서 이전달과 다음달에 포함된 날짜는 연하게 표기하겠다.
   rows.forEach((row)=>{
     row.classList.remove("day-gray")
   })
 
-  
   for (let i=0; i<startIdx; i++){
     row[i].classList.add("day-gray")
   }
@@ -147,17 +160,28 @@ function currentArr (prevDate, prevEndday, nextDate, endDay) {
   }
   //arr의 요소들을 모두 제거 
   arr.length = 0;
+
   }
 
+function currentDate(currentYear, currentMonth){
+  //currentYear과 currentMonth는 달력에 표기된 연도와 날짜를 일컫는 것임
 
+  //today를 가리키는 원판 제거 
+  rows.forEach((row)=>row.classList.remove("day-today"))
+  
+  if(currentMonth < 10){
+     currentMonth = "0" + currentMonth
+  }
+  
+  let todayDate = date.getDate()
+  if(todayDate < 10){
+     todayDate = "0" + todayDate
+   }
+  if(currentYear == moment().year() && currentMonth == moment().month()+1){
 
+    let idx = rows.findIndex((row)=>row.innerHTML == todayDate && !row.classList.contains("day-gray")) 
 
-
-
-
-
-
-
-
-
-
+    rows[idx].classList.add("day-today")
+    
+}
+}

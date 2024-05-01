@@ -94,6 +94,11 @@ body {
   color: gray;
 }
 
+.day-today{
+  color: white;
+  background-color: black;
+}
+
 .day:focus {
   outline: none;
 }
